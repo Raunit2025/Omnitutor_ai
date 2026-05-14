@@ -12,10 +12,7 @@ import type { UserDocument } from '@/types/user';
 const videoTasks = new Map<string, VideoGenerationTask>();
 
 export class VideoGenerationService {
-  /**
-   * Simulate a WebSocket connection for video progress updates.
-   * Calls the callback with progress messages and final video URL.
-   */
+  
   connectToVideoProgress(taskId: string, onMessage: (message: string) => void) {
     let lastStatus: string | undefined;
     let intervalId: NodeJS.Timeout | null = null;
@@ -81,6 +78,24 @@ export class VideoGenerationService {
 
   getStatus(taskId: string): VideoGenerationTask | undefined {
     return videoTasks.get(taskId);
+  }
+
+  async generateWithVeo(options: {
+    topic: string;
+    style?: string;
+    canvas_id: string;
+    forUser: string;
+    target?: string;
+  }): Promise<{ videoUrl: string; status: string }> {
+    
+    // Simulate the time it takes to generate a video
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    // Return the generated video URL
+    return {
+      videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+      status: 'completed'
+    };
   }
 
   private async processVideoGeneration(
