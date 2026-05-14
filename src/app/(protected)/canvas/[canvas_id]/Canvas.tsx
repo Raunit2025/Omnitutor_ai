@@ -6,7 +6,17 @@ import Image from "next/image";
 
 export function Canvas({ children, isOpen, setIsOpen }: { children: React.ReactNode, isOpen: boolean, setIsOpen: (isOpen: boolean) => void }) {
     return (
-        <div className={`h-screen w-screen`}>
+        // Added bg-slate-50 to give a slight contrast against white cursors
+        <div className={`h-screen w-screen bg-slate-50`}>
+            
+            <style dangerouslySetInnerHTML={{__html: `
+                .react-flow__pane { 
+                    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 0v24M0 12h24" stroke="black" stroke-width="2"/></svg>') 12 12, crosshair !important; 
+                }
+                .react-flow__node { cursor: default !important; }
+                .react-flow__handle { cursor: crosshair !important; }
+            `}} />
+
             <CanvasProvider >
                 <LeftSidebar />
                 <main className="w-full h-full">
@@ -63,4 +73,4 @@ export function Canvas({ children, isOpen, setIsOpen }: { children: React.ReactN
             </CanvasProvider>
         </div>
     )
-} 
+}

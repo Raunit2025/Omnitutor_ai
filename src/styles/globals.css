@@ -140,3 +140,17 @@
 		@apply bg-[#F9FBFF] text-foreground;
 	}
 }
+
+/* Fix React Flow Cursor Visibility */
+.react-flow__pane {
+    cursor: crosshair !important;
+}
+
+.react-flow__node {
+    cursor: default !important;
+}
+
+/* Optional: Since you like Dark Mode, you can darken the canvas background slightly */
+.react-flow__renderer {
+    background-color: #f8fafc; /* Very light slate, helps white cursors pop */
+}

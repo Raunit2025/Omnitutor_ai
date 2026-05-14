@@ -95,8 +95,8 @@ export class CanvasService {
             ) as Canvas;
 
             // Find existing node and edge
-            const existingNode = canvas.nodes.find(n => n.id === node.id);
-            const existingEdge = edge ? canvas.edges.find(e => e.id === edge.id) : null;
+            const existingNode = (canvas.nodes || []).find((n: any) => n.id === node.id);
+            const existingEdge = edge ? (canvas.edges || []).find((e: any) => e.id === edge.id) : null;
 
             // Handle edge update
             if (existingEdge && edge) {
@@ -161,8 +161,8 @@ export class CanvasService {
                 config.newCanvasCollectionId,
                 canvas_id,
                 {
-                    nodes: [...canvas.nodes, newNode.$id],
-                    edges: newEdge ? [...canvas.edges, newEdge.$id] : canvas.edges,
+                    nodes: [...(canvas.nodes || []), newNode.$id],
+                    edges: newEdge ? [...(canvas.edges || []), newEdge.$id] : (canvas.edges || []),
                 }
             );
 

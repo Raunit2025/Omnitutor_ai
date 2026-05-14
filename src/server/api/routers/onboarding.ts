@@ -4,7 +4,6 @@ import type { UserDocument } from '@/types/user';
 import { Query } from 'node-appwrite';
 import { z } from 'zod';
 
-
 export const onboardingRouter = createTRPCRouter({
     createUser: protectedProcedure
         .query(async ({ ctx }) => {
@@ -12,6 +11,15 @@ export const onboardingRouter = createTRPCRouter({
             const database = await getDatabase();
             let userData: UserDocument | null = null;
             const config = await getConfig();
+
+            // Store the default usage object
+            const defaultUsage = {
+                syllabusNodes: 0,
+                notesNodes: 0,
+                testNodes: 0,
+                chatNodes: 0,
+                audioChatNodes: 0,
+            };
 
             try {
                 // Check if user already exists
@@ -22,50 +30,39 @@ export const onboardingRouter = createTRPCRouter({
                 if (userDocuments.documents.length > 0) {
                     userData = userDocuments.documents[0] as UserDocument;
 
-                    console.log(userData, "userData");
                     // If user exists and is onboarded, return early
                     if (userData.onboarded_on !== null) {
                         if (!userData.usage) {
                             userData = await database.updateDocument(config.databaseId, config.userCollectionId, userData.$id, {
-                                usage: {
-                                    syllabusNodes: 0,
-                                    notesNodes: 0,
-                                    testNodes: 0,
-                                    chatNodes: 0,
-                                    audioChatNodes: 0,
-                                }
+                                usage: JSON.stringify(defaultUsage) // Stringify for Appwrite
                             }) as UserDocument;
                         }
-                        return { success: true, redirect: '/', user: userData };
 
+                        // Parse back to object for the frontend
+                        if (typeof userData.usage === 'string') {
+                            userData.usage = JSON.parse(userData.usage);
+                        }
+                        return { success: true, redirect: '/', user: userData };
                     }
                 } else {
                     // Create new user if not found
                     userData = await database.createDocument(config.databaseId, config.userCollectionId, ctx.user.$id, {
                         email,
-                        plan: 'free', // Set default plan
-                        usage: {
-                            syllabusNodes: 0,
-                            notesNodes: 0,
-                            testNodes: 0,
-                            chatNodes: 0,
-                            audioChatNodes: 0,
-                        }
+                        plan: 'free',
+                        usage: JSON.stringify(defaultUsage) // Stringify for Appwrite
                     }) as UserDocument;
                 }
 
                 // Ensure user has usage data
-                console.log(userData, "userData here");
                 if (!userData.usage) {
                     userData = await database.updateDocument(config.databaseId, config.userCollectionId, userData.$id, {
-                        usage: {
-                            syllabusNodes: 0,
-                            notesNodes: 0,
-                            testNodes: 0,
-                            chatNodes: 0,
-                            audioChatNodes: 0,
-                        }
+                        usage: JSON.stringify(defaultUsage) // Stringify for Appwrite
                     }) as UserDocument;
+                }
+
+                // Parse back to object for the frontend
+                if (typeof userData.usage === 'string') {
+                    userData.usage = JSON.parse(userData.usage);
                 }
 
                 return { success: true, redirect: '/onboarding', user: userData };
@@ -147,4 +144,4 @@ export const onboardingRouter = createTRPCRouter({
                 onboarded_on: new Date()
             });
         }),
-}); 
+});
