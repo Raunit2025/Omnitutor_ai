@@ -156,11 +156,18 @@ export const authRouter = createTRPCRouter({
 
     getGoogleOAuthUrl: publicProcedure
         .mutation(async () => {
-
             try {
                 const { account } = await createAdminClient();
-                const origin = (await headers()).get('origin');
-
+                const headersList = await headers();
+                
+                // Safely determine the origin, falling back to host if origin is stripped
+                let origin = headersList.get('origin');
+                if (!origin) {
+                    const host = headersList.get('host');
+                    // Automatically use http for localhost and https for Vercel
+                    const protocol = host?.includes('localhost') ? 'http' : 'https';
+                    origin = `${protocol}://${host}`;
+                }
 
                 const redirectUrl = await account.createOAuth2Token(
                     OAuthProvider.Google,
@@ -172,20 +179,6 @@ export const authRouter = createTRPCRouter({
             } catch (error: unknown) {
                 console.error('Google OAuth URL creation failed:', error);
                 throw new Error('Failed to create Google OAuth URL');
-            }
-        }),
-
-    logout: protectedProcedure
-        .mutation(async () => {
-            try {
-                const client = await createSessionClient();
-                const account = await getAccount(client);
-                await account.deleteSession('current');
-                (await cookies()).delete('my-custom-session');
-                return { success: true };
-            } catch (error) {
-                console.error('Logout failed:', error);
-                throw new Error('Failed to logout');
             }
         }),
 }); 
