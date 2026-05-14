@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
@@ -12,19 +12,33 @@ import { useRouter } from 'next/navigation'
 const NavProfile = () => {
     const router = useRouter();
     const { data: profile, isLoading: isProfileLoading } = api.user.getProfile.useQuery();
+    
+    // Add local state to track the loading status safely
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-    const logout = api.auth.logout.useMutation({
-        onSuccess: () => {
-            toast.success('Logged out successfully');
-            router.push('/login');
-        },
-        onError: (error) => {
-            toast.error(error?.message || 'Failed to logout. Please try again.');
-        },
-    });
-
-    const handleLogout = () => {
-        logout.mutate();
+    const handleLogout = async () => {
+        try {
+            setIsLoggingOut(true); // Start loading spinner
+            const response = await fetch('/api/trpc/auth.logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({}),
+            });
+            
+            if (response.ok) {
+                toast.success('Logged out successfully');
+                router.push('/login');
+            } else {
+                throw new Error('Logout failed');
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+            toast.error('An error occurred during logout');
+        } finally {
+            setIsLoggingOut(false); // Stop loading spinner
+        }
     };
 
     const getInitials = (name: string): string => {
@@ -89,16 +103,17 @@ const NavProfile = () => {
                             <DropdownMenuItem
                                 className="cursor-pointer text-red-600 focus:text-red-500 flex items-center"
                                 onClick={handleLogout}
-                                disabled={logout.isPending}
+                                disabled={isLoggingOut}
                             >
                                 <LogOut className="mr-2 h-4 w-4" />
-                                {logout.isPending ? 'Logging out...' : 'Logout'}
+                                {isLoggingOut ? 'Logging out...' : 'Logout'}
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </motion.div>
             )}
-        </div>)
+        </div>
+    )
 }
 
 export default NavProfile
