@@ -12,6 +12,7 @@
     /* Strictness */
     "strict": true,
     "noUncheckedIndexedAccess": true,
+    "ignoreDeprecations": "6.0",
     "checkJs": true,
     /* Bundled projects */
     "lib": [

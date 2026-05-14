@@ -11,24 +11,25 @@ const TutorialsPage = () => {
     const tutorials = [
         { 
             id: 1, 
-            title: "Getting Started with AI Canvases", 
+            title: "Welcome to Omnitutor", 
             icon: <Presentation className="w-6 h-6" />, 
-            duration: "5 min video",
-            videoId: "jNQXAC9IVRw" // Standard placeholder Youtube ID
+            duration: "2 min video",
+            // Change this to the exact name of your video file in the public folder!
+            videoSrc: "/videos/omnitutor-intro.mp4" 
         },
         { 
             id: 2, 
             title: "Generate the Perfect Study Plan", 
             icon: <BookOpen className="w-6 h-6" />, 
-            duration: "8 min video",
-            videoId: "dQw4w9WgXcQ" 
+            duration: "8 min guide",
+            videoSrc: "/videos/omnitutor-intro.mp4" // You can add other videos later
         },
         { 
             id: 3, 
-            title: "Using Veo to Generate Videos", 
+            title: "Using Veo for Custom Videos", 
             icon: <PlayCircle className="w-6 h-6" />, 
-            duration: "10 min video",
-            videoId: "tgbNymZ7vqY" 
+            duration: "5 min guide",
+            videoSrc: "/videos/omnitutor-intro.mp4" // You can add other videos later
         }
     ];
 
@@ -62,7 +63,7 @@ const TutorialsPage = () => {
                                 <p className="text-sm text-gray-500 mt-auto">{tutorial.duration}</p>
                             </div>
 
-                            {/* Interactive Video Expansion */}
+                            {/* Interactive Video Expansion - Now uses native HTML5 Video */}
                             <AnimatePresence>
                                 {activeVideo === tutorial.id && (
                                     <motion.div 
@@ -73,20 +74,21 @@ const TutorialsPage = () => {
                                     >
                                         <button 
                                             onClick={() => setActiveVideo(null)}
-                                            className="absolute top-2 right-2 z-10 bg-black/50 text-white p-1 rounded-full hover:bg-black/80 transition-colors"
+                                            className="absolute top-4 right-4 z-20 bg-black/50 text-white p-2 rounded-full hover:bg-black/80 transition-colors backdrop-blur-sm"
                                         >
                                             <X className="w-5 h-5" />
                                         </button>
-                                        <iframe 
-                                            width="100%" 
-                                            height="100%" 
-                                            src={`https://www.youtube.com/embed/${tutorial.videoId}?autoplay=1&mute=1`} 
-                                            title="YouTube video player" 
-                                            frameBorder="0" 
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                            allowFullScreen
-                                            className="absolute top-0 left-0"
-                                        ></iframe>
+                                        
+                                        {/* HTML5 Native Video Player */}
+                                        <video 
+                                            src={tutorial.videoSrc}
+                                            controls
+                                            autoPlay
+                                            className="w-full h-full object-contain bg-black outline-none"
+                                            controlsList="nodownload"
+                                        >
+                                            Your browser does not support the video tag.
+                                        </video>
                                     </motion.div>
                                 )}
                             </AnimatePresence>

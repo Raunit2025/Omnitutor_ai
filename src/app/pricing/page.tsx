@@ -1,15 +1,58 @@
-import React from 'react';
+"use client"
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
 import { Check } from 'lucide-react';
 import Navbar from '@/components/landing/Navbar';
-
-export const metadata = {
-    title: 'Pricing - Omnitutor',
-    description: 'Simple, transparent pricing for your AI study companion.',
-};
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 const PricingPage = () => {
+    const [isProcessing, setIsProcessing] = useState(false);
+
+    const handlePayment = async (amount: number) => {
+        setIsProcessing(true);
+        try {
+            // 1. Create order on the server
+            const response = await fetch('/api/razorpay', {
+                method: 'POST',
+                body: JSON.stringify({ amount }),
+            });
+            
+            if (!response.ok) throw new Error("Failed to create order");
+            
+            const order = await response.json();
+
+            // 2. Initialize Razorpay options
+            const options = {
+                key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, 
+                amount: order.amount,
+                currency: order.currency,
+                name: "Omnitutor",
+                description: "Pro Plan Subscription",
+                order_id: order.id,
+                handler: function (response: any) {
+                    toast.success("Payment Successful! Welcome to Pro.");
+                    console.log("Payment ID:", response.razorpay_payment_id);
+                },
+                prefill: {
+                    name: "Test User",
+                    email: "test@example.com",
+                },
+                theme: {
+                    color: "#754DFA",
+                },
+            };
+
+            const paymentObject = new (window as any).Razorpay(options);
+            paymentObject.open();
+        } catch (error) {
+            console.error("Payment error:", error);
+            toast.error("Payment initialization failed. Please try again.");
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-[#F5F5F0] flex flex-col items-center">
             <div className="w-full max-w-6xl mt-4">
@@ -72,7 +115,7 @@ const PricingPage = () => {
                         <ul className="flex flex-col gap-4 mb-8 flex-1">
                             {[
                                 'Unlimited Study Canvases', 
-                                'Advanced Veo Video Generation', 
+                                'Advanced Video Generation', 
                                 'Unlimited AI Tutoring Chats', 
                                 'Priority Audio Generation',
                                 'Export Study Plans to PDF'
@@ -84,11 +127,14 @@ const PricingPage = () => {
                             ))}
                         </ul>
 
-                        <Link href="/signup" className="w-full">
-                            <Button variant="lime" className="w-full py-6 text-lg font-semibold text-[#1A1A1A]">
-                                Upgrade to Pro
-                            </Button>
-                        </Link>
+                        <Button 
+                            variant="lime" 
+                            className="w-full py-6 text-lg font-semibold text-[#1A1A1A]" 
+                            disabled={isProcessing}
+                            onClick={() => handlePayment(499)}
+                        >
+                            {isProcessing ? "Processing..." : "Upgrade to Pro"}
+                        </Button>
                     </div>
                 </div>
             </main>
@@ -96,4 +142,5 @@ const PricingPage = () => {
     );
 };
 
+// THIS is the export Next.js was screaming about!
 export default PricingPage;
