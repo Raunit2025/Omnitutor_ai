@@ -23,17 +23,15 @@ const Navbar = () => {
     const handleLogout = async () => {
         try {
             setIsLoggingOut(true);
-            const response = await fetch('/api/trpc/auth.logout', {
+            // Point to our new custom API route!
+            const response = await fetch('/api/logout', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({}),
             });
             
             if (response.ok) {
                 toast.success('Logged out successfully');
                 router.push('/login');
+                router.refresh(); // Forces Next.js to lock the pages
             } else {
                 throw new Error('Logout failed');
             }

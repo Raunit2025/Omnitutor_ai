@@ -109,7 +109,7 @@ export default function AccountPage() {
   const handleLogout = async () => {
     try {
       // Use the standard fetch API to call the logout route directly if tRPC fails
-      const response = await fetch("/api/trpc/auth.logout", {
+      const response = await fetch("/api/logout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
