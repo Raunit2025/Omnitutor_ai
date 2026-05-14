@@ -109,6 +109,7 @@ NOTE: MAXIMUM DAYS ARE 180 DAYS ONLY AND MAXIMUM DAILY STUDY HOURS ARE 3 HOURS O
             ID.unique(),
             {
                 exam,
+                subject: exam, 
                 user: userData.$id,
                 timeline_option,
                 target_date: target_date || null,
