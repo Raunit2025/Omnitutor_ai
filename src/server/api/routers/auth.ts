@@ -158,21 +158,19 @@ export const authRouter = createTRPCRouter({
         .mutation(async () => {
             try {
                 const { account } = await createAdminClient();
-                const headersList = await headers();
                 
-                // Safely determine the origin, falling back to host if origin is stripped
-                let origin = headersList.get('origin');
-                if (!origin) {
-                    const host = headersList.get('host');
-                    // Automatically use http for localhost and https for Vercel
-                    const protocol = host?.includes('localhost') ? 'http' : 'https';
-                    origin = `${protocol}://${host}`;
-                }
+                // BULLETPROOF FIX: Check if Next.js is running in dev or production
+                const isDev = process.env.NODE_ENV === 'development';
+                
+                // Explicitly set the absolute URLs so they can never fail
+                const origin = isDev 
+                    ? 'http://localhost:3000' 
+                    : 'https://omnitutor-ai.vercel.app';
 
                 const redirectUrl = await account.createOAuth2Token(
                     OAuthProvider.Google,
-                    `${origin}/oauth`,
-                    `${origin}/signup`,
+                    `${origin}/oauth`,   // Success URL
+                    `${origin}/signup`,  // Failure URL
                 );
 
                 return { url: redirectUrl };
