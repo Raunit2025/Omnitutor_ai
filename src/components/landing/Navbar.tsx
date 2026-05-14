@@ -17,18 +17,32 @@ const Navbar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const { data: profile, isLoading: isProfileLoading } = api.user.getProfile.useQuery();
 
-    const logout = api.auth.logout.useMutation({
-        onSuccess: () => {
-            toast.success('Logged out successfully');
-            router.push('/login');
-        },
-        onError: (error) => {
-            toast.error(error?.message || 'Failed to logout. Please try again.');
-        },
-    });
+    // Replaced TRPC with safe local state to bypass Vercel build errors
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-    const handleLogout = () => {
-        logout.mutate();
+    const handleLogout = async () => {
+        try {
+            setIsLoggingOut(true);
+            const response = await fetch('/api/trpc/auth.logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({}),
+            });
+            
+            if (response.ok) {
+                toast.success('Logged out successfully');
+                router.push('/login');
+            } else {
+                throw new Error('Logout failed');
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+            toast.error('Failed to logout. Please try again.');
+        } finally {
+            setIsLoggingOut(false);
+        }
     };
 
     const getInitials = (name: string): string => {
@@ -68,7 +82,7 @@ const Navbar = () => {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-                    className="hidden  items-center gap-6 lg:gap-8"
+                    className="hidden md:flex items-center gap-6 lg:gap-8"
                 >
                     <Link href="/pricing" className="text-[#1A1A1A] hover:text-[#754DFA] transition-colors text-sm lg:text-base">Pricing</Link>
                     <Link href="/tutorials" className="text-[#1A1A1A] hover:text-[#754DFA] transition-colors text-sm lg:text-base">Tutorials</Link>
@@ -188,10 +202,10 @@ const Navbar = () => {
                             <DropdownMenuItem
                                 className="cursor-pointer text-red-600 focus:text-red-500 flex items-center"
                                 onClick={handleLogout}
-                                disabled={logout.isPending}
+                                disabled={isLoggingOut}
                             >
                                 <LogOut className="mr-2 h-4 w-4" />
-                                {logout.isPending ? 'Logging out...' : 'Logout'}
+                                {isLoggingOut ? 'Logging out...' : 'Logout'}
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -215,10 +229,6 @@ const Navbar = () => {
                             transition={{ duration: 0.3, delay: 0.1, ease: "easeOut" }}
                             className="flex flex-col gap-4 "
                         >
-                            {/* Navigation links */}
-
-                            {/* Auth buttons for mobile */}
-
                             {/* Loading skeleton for mobile */}
                             {isProfileLoading && (
                                 <div className="flex flex-col gap-3 pt-3 border-t border-[#E2E1D9]">
@@ -284,10 +294,10 @@ const Navbar = () => {
                                             handleLogout();
                                             setIsMobileMenuOpen(false);
                                         }}
-                                        disabled={logout.isPending}
+                                        disabled={isLoggingOut}
                                     >
                                         <LogOut className="mr-2 h-4 w-4" />
-                                        {logout.isPending ? 'Logging out...' : 'Logout'}
+                                        {isLoggingOut ? 'Logging out...' : 'Logout'}
                                     </button>
                                 </div>
                             )}
