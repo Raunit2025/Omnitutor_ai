@@ -115,6 +115,7 @@ NOTE: MAXIMUM DAYS ARE 180 DAYS ONLY AND MAXIMUM DAILY STUDY HOURS ARE 3 HOURS O
                 target_date: target_date || null,
                 daily_study_hours,
                 created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
                 monthly_plan: JSON.stringify(aiPlan.monthly_plan),
                 current_progress: JSON.stringify({
                     total_goals: 0,
